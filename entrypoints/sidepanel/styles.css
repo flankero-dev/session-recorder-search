@@ -585,6 +585,17 @@ button {
 
 /* ---- Sessions list ---- */
 
+.sessions__search {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+}
+
 .sessions__empty {
   color: var(--muted);
   font-size: 12px;
