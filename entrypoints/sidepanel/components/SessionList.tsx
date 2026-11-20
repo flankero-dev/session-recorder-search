@@ -4,7 +4,7 @@
  * delete button removes the session (cascading its events + assets).
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { formatClock } from '@/lib/export/markdown';
 import type { Session } from '@/lib/session/types';
 import { useSessionList } from './useSessionList';
@@ -15,6 +15,7 @@ interface SessionListProps {
 
 export function SessionList({ onOpen }: SessionListProps): React.JSX.Element {
   const { sessions, loading, remove, now } = useSessionList();
+  const [search, setSearch] = useState('');
 
   if (loading && sessions.length === 0) {
     return <p className="sessions__empty">Loading…</p>;
@@ -24,10 +25,26 @@ export function SessionList({ onOpen }: SessionListProps): React.JSX.Element {
     return <p className="sessions__empty">No recordings yet.</p>;
   }
 
+  const query = search.trim().toLowerCase();
+  const matches = query
+    ? sessions.filter((session) =>
+        session.name.toLowerCase().includes(query) || startingHost(session.initialUrl).includes(query),
+      )
+    : sessions;
+
   return (
     <div className="sessions">
+      <input
+        type="search"
+        className="sessions__search"
+        aria-label="Filter recordings by name or starting site"
+        placeholder="Search by name or starting site"
+        value={search}
+        onChange={(event) => setSearch(event.currentTarget.value)}
+      />
+      {matches.length === 0 && <p className="sessions__empty" role="status">No matching recordings.</p>}
       <ul className="sessions__list" aria-label="Recorded sessions">
-        {sessions.map((s) => (
+        {matches.map((s) => (
           <li key={s.id} className="session-row">
             <button
               type="button"
@@ -53,6 +70,14 @@ export function SessionList({ onOpen }: SessionListProps): React.JSX.Element {
       </ul>
     </div>
   );
+}
+
+function startingHost(url: string): string {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return '';
+  }
 }
 
 function durationOf(s: Session): number {
